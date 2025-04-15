@@ -1,43 +1,65 @@
-<canvas id="idCard" width="400" height="250"></canvas>
-<script>
-// Ambil parameter dari URL
-const urlParams = new URLSearchParams(window.location.search);
-const nama = urlParams.get('nama') || 'Unknown';
-const kelas = urlParams.get('class') || 'Classless';
-const avatarURL = urlParams.get('avatar') || 'https://i.imgur.com/3Z5s2oK.png';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Identity Card RPG</title>
+  <style>
+    body {
+      margin: 0;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    canvas {
+      border: 5px solid #f1c40f;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="idCard" width="400" height="250"></canvas>
+  <script>
+    const canvas = document.getElementById("idCard");
+    const ctx = canvas.getContext("2d");
 
-const canvas = document.getElementById("idCard");
-const ctx = canvas.getContext("2d");
+    // Ambil parameter dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const nama = urlParams.get('nama') || 'Unknown';
+    const kelas = urlParams.get('class') || 'Classless';
+    const avatarURL = urlParams.get('avatar') || 'https://i.imgur.com/3Z5s2oK.png';
 
-// Background putih
-ctx.fillStyle = "#ffffff";
-ctx.fillRect(0, 0, 400, 250);
+    // Background putih
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-// Bingkai kuning
-ctx.strokeStyle = "#f1c40f";
-ctx.lineWidth = 5;
-ctx.strokeRect(0, 0, 400, 250);
+    // Tulisan Nama dan Class
+    ctx.fillStyle = "#f1c40f";
+    ctx.font = "bold 22px Arial";
+    ctx.fillText(`Nama: ${nama}`, 20, 40);
+    ctx.font = "20px Arial";
+    ctx.fillText(`Class: ${kelas}`, 20, 75);
 
-// Nama
-ctx.fillStyle = "#f1c40f";
-ctx.font = "bold 24px Arial";
-ctx.fillText(`Nama: ${nama}`, 20, 40);
+    // Gambar Avatar Bulat
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = avatarURL;
 
-// Class
-ctx.font = "20px Arial";
-ctx.fillText(`Class: ${kelas}`, 20, 75);
+    img.onload = () => {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(320, 125, 60, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(img, 260, 65, 120, 120);
+      ctx.restore();
+    };
 
-// Avatar (bulat)
-const img = new Image();
-img.crossOrigin = "Anonymous";
-img.src = avatarURL;
-img.onload = () => {
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(320, 125, 60, 0, Math.PI * 2);
-  ctx.closePath();
-  ctx.clip();
-  ctx.drawImage(img, 260, 65, 120, 120);
-  ctx.restore();
-};
-</script>
+    img.onerror = () => {
+      ctx.fillStyle = "red";
+      ctx.fillText("Avatar gagal dimuat", 200, 125);
+    };
+  </script>
+</body>
+</html>
