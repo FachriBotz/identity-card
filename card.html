@@ -1,65 +1,634 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Identity Card RPG</title>
-  <style>
-    body {
-      margin: 0;
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    canvas {
-      border: 5px solid #f1c40f;
-      border-radius: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Identity Card</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #ffd700;
+            text-shadow: 0 0 5px #ffa500;
+            margin-bottom: 30px;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            max-width: 1200px;
+        }
+        
+        .form-container {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+            width: 300px;
+        }
+        
+        .card-container {
+            width: 400px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffd700;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background-color: #2a2a2a;
+            color: #f0f0f0;
+        }
+        
+        button {
+            background-color: #7e57c2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #5e35b1;
+        }
+        
+        canvas {
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        
+        .presets {
+            margin-top: 20px;
+            border-top: 1px solid #333;
+            padding-top: 15px;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .preset-btn {
+            background-color: #4a4a4a;
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+        
+        #urlInfo {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .notice {
+            background-color: rgba(128, 0, 128, 0.2);
+            border-left: 3px solid #9c27b0;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
-  <canvas id="idCard" width="400" height="250"></canvas>
-  <script>
-    const canvas = document.getElementById("idCard");
-    const ctx = canvas.getContext("2d");
+    <h1>Fantasy Identity Card Creator</h1>
+    
+    <div class="container">
+        <div class="form-container">
+            <div class="input-group">
+                <label for="characterName">Nama:</label>
+                <input type="text" id="characterName" placeholder="Masukkan nama karakter">
+            </div>
+            
+            <div class="input-group">
+                <label for="race">Race:</label>
+                <select id="race">
+                    <option value="Human">Human</option>
+                    <option value="Elf">Elf</option>
+                    <option value="Dwarf">Dwarf</option>
+                    <option value="Orc">Orc</option>
+                    <option value="Halfling">Halfling</option>
+                    <option value="Dragonborn">Dragonborn</option>
+                    <option value="Tiefling">Tiefling</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="class">Class:</label>
+                <select id="class">
+                    <option value="Warrior">Warrior</option>
+                    <option value="Mage">Mage</option>
+                    <option value="Rogue">Rogue</option>
+                    <option value="Cleric">Cleric</option>
+                    <option value="Ranger">Ranger</option>
+                    <option value="Paladin">Paladin</option>
+                    <option value="Bard">Bard</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="level">Level:</label>
+                <input type="number" id="level" min="1" max="100" value="1">
+            </div>
+            
+            <div class="input-group">
+                <label for="avatarInput">Avatar URL:</label>
+                <input type="text" id="avatarInput" placeholder="URL gambar avatar">
+            </div>
+            
+            <div class="input-group">
+                <label for="avatarUpload">Atau Upload Avatar:</label>
+                <input type="file" id="avatarUpload" accept="image/*">
+            </div>
+            
+            <button id="generateCard">Generate Card</button>
+            
+            <div class="notice">
+                <p><strong>Format URL Parameter:</strong></p>
+                <code>card.html?nama=NamaKarakter&race=RaceKarakter&class=ClassKarakter&level=LevelKarakter&avatar=URLAvatar</code>
+            </div>
+            
+            <div class="presets">
+                <label>Presets:</label>
+                <div class="preset-buttons">
+                    <button class="preset-btn" id="presetWarrior">Human Warrior</button>
+                    <button class="preset-btn" id="presetMage">Elf Mage</button>
+                    <button class="preset-btn" id="presetRogue">Halfling Rogue</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-container">
+            <canvas id="idCard" width="400" height="600"></canvas>
+        </div>
+    </div>
 
-    // Ambil parameter dari URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const nama = urlParams.get('nama') || 'Unknown';
-    const kelas = urlParams.get('class') || 'Classless';
-    const avatarURL = urlParams.get('avatar') || 'https://i.imgur.com/3Z5s2oK.png';
-
-    // Background putih
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Tulisan Nama dan Class
-    ctx.fillStyle = "#f1c40f";
-    ctx.font = "bold 22px Arial";
-    ctx.fillText(`Nama: ${nama}`, 20, 40);
-    ctx.font = "20px Arial";
-    ctx.fillText(`Class: ${kelas}`, 20, 75);
-
-    // Gambar Avatar Bulat
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = avatarURL;
-
-    img.onload = () => {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(320, 125, 60, 0, Math.PI * 2);
-      ctx.closePath();
-      ctx.clip();
-      ctx.drawImage(img, 260, 65, 120, 120);
-      ctx.restore();
-    };
-
-    img.onerror = () => {
-      ctx.fillStyle = "red";
-      ctx.fillText("Avatar gagal dimuat", 200, 125);
-    };
-  </script>
+    <script>
+        // Initialize Fabric.js canvas
+        const canvas = new fabric.Canvas('idCard');
+        
+        // Set background color
+        canvas.setBackgroundColor('#2c3e50', canvas.renderAll.bind(canvas));
+        
+        // Load background image
+        const backgroundImg = new Image();
+        backgroundImg.src = '/api/placeholder/400/600';
+        backgroundImg.onload = function() {
+            const background = new fabric.Image(backgroundImg, {
+                width: canvas.width,
+                height: canvas.height,
+                originX: 'left',
+                originY: 'top'
+            });
+            
+            // Add filters to background image
+            background.filters.push(
+                new fabric.Image.filters.BlendColor({
+                    color: '#3a1c71',
+                    mode: 'tint',
+                    alpha: 0.7
+                })
+            );
+            background.applyFilters();
+            canvas.add(background);
+            background.sendToBack();
+            
+            // Add decorative elements
+            addDecorations();
+            
+            // Add default placeholder avatar
+            addPlaceholderAvatar();
+            
+            // Parse URL parameters and populate the form
+            parseUrlParameters();
+            
+            // Add default text fields
+            const name = document.getElementById('characterName').value || "Character Name";
+            const race = document.getElementById('race').value;
+            const characterClass = document.getElementById('class').value;
+            const level = document.getElementById('level').value;
+            
+            addTextFields(name, race, characterClass, level);
+            
+            // Check if avatar URL is provided
+            const avatarUrl = document.getElementById('avatarInput').value;
+            if (avatarUrl) {
+                replaceAvatar(avatarUrl);
+            }
+            
+            canvas.renderAll();
+        };
+        
+        // Function to parse URL parameters
+        function parseUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Get parameters
+            const name = urlParams.get('nama');
+            const race = urlParams.get('race');
+            const characterClass = urlParams.get('class');
+            const level = urlParams.get('level');
+            const avatar = urlParams.get('avatar');
+            
+            // Fill form with URL parameters if they exist
+            if (name) document.getElementById('characterName').value = name;
+            if (race) document.getElementById('race').value = race;
+            if (characterClass) document.getElementById('class').value = characterClass;
+            if (level) document.getElementById('level').value = level;
+            if (avatar) document.getElementById('avatarInput').value = avatar;
+        }
+        
+        // Function to add decorative elements
+        function addDecorations() {
+            // Add border
+            const border = new fabric.Rect({
+                width: canvas.width - 20,
+                height: canvas.height - 20,
+                left: 10,
+                top: 10,
+                fill: 'transparent',
+                stroke: '#ffd700',
+                strokeWidth: 4,
+                rx: 10,
+                ry: 10
+            });
+            canvas.add(border);
+            
+            // Add header
+            const header = new fabric.Rect({
+                width: canvas.width - 40,
+                height: 60,
+                left: 20,
+                top: 20,
+                fill: 'rgba(50, 25, 100, 0.7)',
+                rx: 5,
+                ry: 5
+            });
+            canvas.add(header);
+            
+            // Add title
+            const title = new fabric.Text("FANTASY REALM", {
+                left: canvas.width / 2,
+                top: 32,
+                fontFamily: 'Fantasy, serif',
+                fontSize: 28,
+                fill: '#ffd700',
+                fontWeight: 'bold',
+                originX: 'center',
+                shadow: new fabric.Shadow({
+                    color: 'rgba(255, 215, 0, 0.5)',
+                    blur: 5,
+                    offsetX: 0,
+                    offsetY: 0
+                })
+            });
+            canvas.add(title);
+            
+            // Add subtitle
+            const subtitle = new fabric.Text("OFFICIAL IDENTITY CARD", {
+                left: canvas.width / 2,
+                top: 65,
+                fontFamily: 'Fantasy, serif',
+                fontSize: 14,
+                fill: '#ffffff',
+                originX: 'center'
+            });
+            canvas.add(subtitle);
+            
+            // Add decorative elements
+            const corner1 = new fabric.Circle({
+                radius: 15,
+                fill: '#ffd700',
+                left: 25,
+                top: 25,
+                opacity: 0.7
+            });
+            canvas.add(corner1);
+            
+            const corner2 = new fabric.Circle({
+                radius: 15,
+                fill: '#ffd700',
+                left: canvas.width - 40,
+                top: 25,
+                opacity: 0.7
+            });
+            canvas.add(corner2);
+            
+            const corner3 = new fabric.Circle({
+                radius: 15,
+                fill: '#ffd700',
+                left: 25,
+                top: canvas.height - 40,
+                opacity: 0.7
+            });
+            canvas.add(corner3);
+            
+            const corner4 = new fabric.Circle({
+                radius: 15,
+                fill: '#ffd700',
+                left: canvas.width - 40,
+                top: canvas.height - 40,
+                opacity: 0.7
+            });
+            canvas.add(corner4);
+            
+            // Add footer with fantasy emblem
+            const footer = new fabric.Text("KINGDOM OF ELDORIA", {
+                left: canvas.width / 2,
+                top: canvas.height - 35,
+                fontFamily: 'Fantasy, serif',
+                fontSize: 16,
+                fill: '#ffd700',
+                fontWeight: 'bold',
+                originX: 'center'
+            });
+            canvas.add(footer);
+        }
+        
+        // Function to add placeholder avatar
+        function addPlaceholderAvatar() {
+            // Avatar background container
+            const avatarBg = new fabric.Circle({
+                radius: 70,
+                fill: 'rgba(0, 0, 0, 0.5)',
+                left: canvas.width / 2,
+                top: 180,
+                originX: 'center',
+                originY: 'center',
+                stroke: '#ffd700',
+                strokeWidth: 3
+            });
+            canvas.add(avatarBg);
+            
+            // Placeholder avatar image
+            const avatarImg = new Image();
+            avatarImg.src = '/api/placeholder/140/140';
+            avatarImg.onload = function() {
+                const avatar = new fabric.Image(avatarImg, {
+                    left: canvas.width / 2,
+                    top: 180,
+                    originX: 'center',
+                    originY: 'center',
+                    radius: 65,
+                    clipPath: new fabric.Circle({
+                        radius: 65,
+                        originX: 'center',
+                        originY: 'center'
+                    })
+                });
+                canvas.add(avatar);
+                canvas.renderAll();
+                avatar.setCoords();
+                
+                // Store reference to avatar for later replacement
+                canvas.avatar = avatar;
+            };
+        }
+        
+        // Function to add text fields
+        function addTextFields(name, race, characterClass, level) {
+            // Remove existing text fields if they exist
+            if (canvas.nameText) canvas.remove(canvas.nameText);
+            if (canvas.raceLabel) canvas.remove(canvas.raceLabel);
+            if (canvas.raceText) canvas.remove(canvas.raceText);
+            if (canvas.classLabel) canvas.remove(canvas.classLabel);
+            if (canvas.classText) canvas.remove(canvas.classText);
+            if (canvas.levelLabel) canvas.remove(canvas.levelLabel);
+            if (canvas.levelText) canvas.remove(canvas.levelText);
+            
+            // Character name
+            const nameText = new fabric.Text(name, {
+                left: canvas.width / 2,
+                top: 270,
+                fontFamily: 'Fantasy, serif',
+                fontSize: 30,
+                fill: '#ffffff',
+                fontWeight: 'bold',
+                originX: 'center',
+                shadow: new fabric.Shadow({
+                    color: 'rgba(0, 0, 0, 0.7)',
+                    blur: 3,
+                    offsetX: 2,
+                    offsetY: 2
+                })
+            });
+            canvas.add(nameText);
+            canvas.nameText = nameText;
+            
+            // Stats background
+            const statsBg = new fabric.Rect({
+                width: canvas.width - 80,
+                height: 180,
+                left: 40,
+                top: 310,
+                fill: 'rgba(50, 25, 100, 0.5)',
+                rx: 10,
+                ry: 10,
+                stroke: '#ffd700',
+                strokeWidth: 1
+            });
+            canvas.add(statsBg);
+            
+            // Character race
+            const raceLabel = new fabric.Text("RACE", {
+                left: 70,
+                top: 335,
+                fontFamily: 'Fantasy, serif',
+                fontSize: 16,
+                fill: '#ffd700',
+                fontWeight: 'bold'
+            });
+            canvas.add(raceLabel);
+            canvas.raceLabel = raceLabel;
+            
+            const raceText = new fabric.Text(race, {
+                left: 70,
+                top: 355,
+                fontFamily: 'Fantasy, serif',
+                fontSize: 24,
+                fill: '#ffffff'
+            });
+            canvas.add(raceText);
+            canvas.raceText = raceText;
+            
+            // Character class
+            const classLabel = new fabric.Text("CLASS", {
+                left: 70,
+                top: 395,
+                fontFamily: 'Fantasy, serif',
+                fontSize: 16,
+                fill: '#ffd700',
+                fontWeight: 'bold'
+            });
+            canvas.add(classLabel);
+            canvas.classLabel = classLabel;
+            
+            const classText = new fabric.Text(characterClass, {
+                left: 70,
+                top: 415,
+                fontFamily: 'Fantasy, serif',
+                fontSize: 24,
+                fill: '#ffffff'
+            });
+            canvas.add(classText);
+            canvas.classText = classText;
+            
+            // Character level
+            const levelLabel = new fabric.Text("LEVEL", {
+                left: 70,
+                top: 455,
+                fontFamily: 'Fantasy, serif',
+                fontSize: 16,
+                fill: '#ffd700',
+                fontWeight: 'bold'
+            });
+            canvas.add(levelLabel);
+            canvas.levelLabel = levelLabel;
+            
+            const levelText = new fabric.Text(level, {
+                left: 70,
+                top: 475,
+                fontFamily: 'Fantasy, serif',
+                fontSize: 24,
+                fill: '#ffffff'
+            });
+            canvas.add(levelText);
+            canvas.levelText = levelText;
+            
+            // Add level emblem
+            const levelEmblem = new fabric.Circle({
+                radius: 35,
+                fill: 'rgba(50, 25, 100, 0.8)',
+                stroke: '#ffd700',
+                strokeWidth: 2,
+                left: 300,
+                top: 425,
+                originX: 'center',
+                originY: 'center'
+            });
+            canvas.add(levelEmblem);
+            
+            const levelEmblemText = new fabric.Text(level, {
+                left: 300,
+                top: 425,
+                fontFamily: 'Fantasy, serif',
+                fontSize: 30,
+                fontWeight: 'bold',
+                fill: '#ffd700',
+                originX: 'center',
+                originY: 'center'
+            });
+            canvas.add(levelEmblemText);
+            
+            canvas.renderAll();
+        }
+        
+        // Function to replace avatar
+        function replaceAvatar(imageUrl) {
+            fabric.Image.fromURL(imageUrl, function(img) {
+                if (canvas.avatar) {
+                    canvas.remove(canvas.avatar);
+                }
+                
+                img.set({
+                    left: canvas.width / 2,
+                    top: 180,
+                    originX: 'center',
+                    originY: 'center',
+                    radius: 65,
+                    clipPath: new fabric.Circle({
+                        radius: 65,
+                        originX: 'center',
+                        originY: 'center'
+                    })
+                });
+                
+                canvas.add(img);
+                canvas.avatar = img;
+                canvas.renderAll();
+            }, { crossOrigin: 'anonymous' });
+        }
+        
+        // Generate card button click handler
+        document.getElementById('generateCard').addEventListener('click', function() {
+            const name = document.getElementById('characterName').value || "Character Name";
+            const race = document.getElementById('race').value;
+            const characterClass = document.getElementById('class').value;
+            const level = document.getElementById('level').value;
+            
+            addTextFields(name, race, characterClass, level);
+            
+            // Check for avatar URL
+            const avatarUrl = document.getElementById('avatarInput').value;
+            if (avatarUrl) {
+                replaceAvatar(avatarUrl);
+            }
+            
+            // Check if new avatar was uploaded
+            const fileInput = document.getElementById('avatarUpload');
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    replaceAvatar(e.target.result);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        });
+        
+        // Preset buttons
+        document.getElementById('presetWarrior').addEventListener('click', function() {
+            document.getElementById('characterName').value = "Thorin Ironshield";
+            document.getElementById('race').value = "Human";
+            document.getElementById('class').value = "Warrior";
+            document.getElementById('level').value = "5";
+            document.getElementById('generateCard').click();
+        });
+        
+        document.getElementById('presetMage').addEventListener('click', function() {
+            document.getElementById('characterName').value = "Elyndra Starweaver";
+            document.getElementById('race').value = "Elf";
+            document.getElementById('class').value = "Mage";
+            document.getElementById('level').value = "7";
+            document.getElementById('generateCard').click();
+        });
+        
+        document.getElementById('presetRogue').addEventListener('click', function() {
+            document.getElementById('characterName').value = "Pippin Quickfingers";
+            document.getElementById('race').value = "Halfling";
+            document.getElementById('class').value = "Rogue";
+            document.getElementById('level').value = "3";
+            document.getElementById('generateCard').click();
+        });
+    </script>
 </body>
-</html>
+                      </html>
